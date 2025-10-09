@@ -3,18 +3,33 @@
   "version": "0.1.0",
   "description": "A cli to connect to the erisbot api",
   "license": "MIT",
-  "author": "BirdTool",
+  "author": "birdtool",
   "type": "module",
   "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "README.md"
+  ],
   "scripts": {
-    "test": "npm run dev"
+    "dev": "tsc --watch",
+    "build": "tsc",
+    "prepublishOnly": "yarn build",
+    "test": "echo \"No tests yet\""
   },
   "devDependencies": {
-    "@types/node": "^24.7.1",
-    "typescript": "^5.9.3"
+    "typescript": "^5.0.0",
+    "@types/node": "^20.0.0"
   },
-  "dependencies": {
-    "axios": "^1.12.2"
-  },
-  "packageManager": "yarn@4.10.3"
+  "keywords": [
+    "cli",
+    "erisbot",
+    "bot",
+    "api",
+    "studiostyx"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/studio-styx/eris-api-cli.git"
+  }
 }
