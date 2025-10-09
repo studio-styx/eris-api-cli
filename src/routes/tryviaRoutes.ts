@@ -1,5 +1,5 @@
 import axios from "axios";
-import { BASEURL } from "..";
+import { BASEURL } from "../index.js";
 
 // Tipos base
 type TryviaQuestionType = "BOOLEAN" | "MULTIPLE" | "WRITEINCHAT";
