@@ -23,3 +23,5 @@ export class ErisApiCli {
         return new TryviaRoutes(this.token);
     }
 }
+
+export default ErisApiCli;
