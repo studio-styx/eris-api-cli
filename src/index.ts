@@ -1,6 +1,6 @@
-import { MeRoutes } from "./routes/meRoutes";
-import { TryviaRoutes } from "./routes/tryviaRoutes";
-import { UserRoutes } from "./routes/users";
+import { MeRoutes } from "./routes/meRoutes.js";
+import { TryviaRoutes } from "./routes/tryviaRoutes.js";
+import { UserRoutes } from "./routes/users.js";
 
 export const BASEURL = "https://apieris.squareweb.app/v1"
 
