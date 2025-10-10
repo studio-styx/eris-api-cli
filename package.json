@@ -18,8 +18,8 @@
     "test": "echo \"No tests yet\""
   },
   "devDependencies": {
-    "typescript": "^5.0.0",
-    "@types/node": "^20.0.0"
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0"
   },
   "keywords": [
     "cli",
@@ -31,5 +31,8 @@
   "repository": {
     "type": "git",
     "url": "git+https://github.com/studio-styx/eris-api-cli.git"
+  },
+  "dependencies": {
+    "axios": "^1.12.2"
   }
 }
