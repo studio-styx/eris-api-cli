@@ -1,6 +1,6 @@
-import { TransactionStatus, UserTransaction } from "../types";
-import { BASEURL } from "..";
-import { CacheRoute } from "../cache";
+import { TransactionStatus, UserTransaction } from "../types.js";
+import { BASEURL } from "../index.js";
+import { CacheRoute } from "../cache.js";
 import { RequestHelper } from "../helpers/requestHelper.js";
 
 /**
