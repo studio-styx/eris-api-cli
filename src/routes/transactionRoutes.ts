@@ -100,7 +100,7 @@ export class TransactionRoute {
             throw new Error(`[ERIS API CLI ERROR] Transaction is already expired`);
 
         // Se expira em menos de 5 minutos, usa rota especial
-        const expiresSoon = tx.expiresAt.getTime() - Date.now() <= 5 * 60 * 1000;
+        const expiresSoon = new Date(tx.expiresAt).getTime() - Date.now() <= 5 * 60 * 1000;
 
         if (expiresSoon) {
             const res = await this.helper.send<{ status: TransactionStatus | "DELETED" }>(

@@ -29,7 +29,7 @@ export class RequestHelper {
             ...config,
             headers: {
                 ...(config.headers || {}),
-                "X-Authorization": this.token,
+                Authorization: this.token,
             },
         };
 
