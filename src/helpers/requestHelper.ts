@@ -1,4 +1,3 @@
-// src/helpers/requestHelper.ts
 import axios, { AxiosError, AxiosRequestConfig } from "axios";
 
 type CacheLike = { get(key: string): any };
@@ -30,7 +29,7 @@ export class RequestHelper {
             ...config,
             headers: {
                 ...(config.headers || {}),
-                Authorization: this.token,
+                "X-Authorization": this.token,
             },
         };
 
