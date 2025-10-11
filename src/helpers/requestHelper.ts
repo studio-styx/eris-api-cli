@@ -29,8 +29,8 @@ export class RequestHelper {
         const requestConfig: AxiosRequestConfig = {
             ...config,
             headers: {
-                Authorization: this.token,
                 ...(config.headers || {}),
+                Authorization: this.token,
             },
         };
 
