@@ -105,7 +105,7 @@ export class TransactionRoute {
         if (expiresSoon) {
             const res = await this.helper.send<{ status: TransactionStatus | "DELETED" }>(
                 {
-                    url: `${BASEURL}/transaction/wait/${tx.id}`,
+                    url: `${BASEURL}/economy/transaction/wait/${tx.id}`,
                     method: "PATCH",
                 },
                 "ECONOMY.WRITE",
