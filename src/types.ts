@@ -81,7 +81,54 @@ export type UserInfoPet = {
     spouseId: number | null;
     parent1Id: number | null;
     parent2Id: number | null;
+    personality: ({
+        trait: {
+            id: number;
+            name: string;
+            geneType: PetInfoGeneticsGeneType;
+            personalityConflictNames: string[];
+        };
+    } & {
+        id: number;
+        userPetId: number;
+        traitId: number;
+    })[];
+    genetics: ({
+        gene: {
+            id: number;
+            trait: string;
+            createdAt: Date;
+            updatedAt: Date;
+            petId: number;
+            geneType: PetInfoGeneticsGeneType;
+            colorPart: PetInfoGeneticsColorPart;
+        };
+    } & {
+        id: number;
+        createdAt: Date;
+        userPetId: number;
+        geneId: number;
+        inheritedFromParent1: boolean | null;
+        inheritedFromParent2: boolean | null;
+    })[];
+    skills: ({
+        skill: {
+            id: number;
+            name: string;
+            createdAt: Date;
+        };
+    } & {
+        id: number;
+        xp: number;
+        createdAt: Date;
+        userPetId: number;
+        skillId: number;
+        level: number;
+    })[];
 };
+
+export type PetInfoGeneticsGeneType = "DOMINANT" | "RECESSIVE" | "CODOMINANT" | "NEUTRAL";
+export type PetInfoGeneticsColorPart = "EYE" | "COLOR1" | "COLOR2"
 
 export type UserInfoGiveaways = {
     id: number;
@@ -167,3 +214,25 @@ export type ErisCliGiveawayInfo = ({
     serverStayRequired: boolean;
     usersWins: number;
 });
+
+export type ErisApiError = { message: string; success: false; errors?: { path: string; message: string }[] };
+export type UserInfoFull = UserInfo & {
+    stocks: UserInfoStock[];
+    fishs: UserInfoFish[];
+    fishingRods: UserInfoFishingRod[];
+    cooldowns: UserInfoCooldown[];
+    company: ErisCliCompany;
+    giveaways: UserInfoGiveaways[];
+    activePet: UserInfoPet | null;
+    pets: UserInfoPet[];
+    discord: ErisCliDiscordUserGeneric & any;
+};
+
+export type ErisCliDiscordUserGeneric = {
+    id: string;
+    username: string;
+    discriminator: string;
+    avatar: string | null;
+    bot: boolean;
+    banner: string | null;
+}

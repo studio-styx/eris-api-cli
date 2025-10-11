@@ -1,54 +1,77 @@
-import axios from "axios";
-import { BASEURL } from "..";
-import { ErisCliGiveawayInfo } from "../types";
-import { CacheRoute } from "../cache";
+import { BASEURL } from "../index.js";
+import { ErisCliGiveawayInfo } from "../types.js";
+import { CacheRoute } from "../cache.js";
+import { RequestHelper } from "../helpers/requestHelper.js";
 
+
+/**
+ * Rotas relacionadas a sorteios (giveaways).
+ * Permite consultar informações e aguardar o fim do sorteio.
+ *
+ * @example
+ * ```ts
+ * const giveaway = new GiveawayRoutes(token, { id: "123", ended: false, expiresAt: new Date(), ... });
+ * 
+ * // Obter informações atualizadas do giveaway
+ * const info = await giveaway.fetchInfo();
+ * console.log(info.expiresAt);
+ * 
+ * // Aguardar até o sorteio terminar
+ * const finalState = await giveaway.waitForEnd();
+ * console.log(finalState.ended); // true
+ * ```
+ */
 export class GiveawayRoutes {
-    private token: string;
     private giveaway: ErisCliGiveawayInfo;
     private cache: CacheRoute = new CacheRoute();
+    private helper: RequestHelper;
 
-    constructor(token: string, giveaway: ErisCliGiveawayInfo, cache?: CacheRoute) {
-        this.token = token;
+    constructor(token: string, giveaway: ErisCliGiveawayInfo, cache?: CacheRoute, debug: boolean = false) {
         this.giveaway = giveaway;
         if (cache) this.cache = cache;
+        this.helper = new RequestHelper(token, debug);
     }
 
-    private async checkPermissions(permission: string) {
-        const botPerms = this.cache.get("permissions") as string[] | undefined;
-
-        if (botPerms && (!botPerms.includes(permission) || !botPerms.includes("ALL"))) throw new Error("[ERIS API CLI ERROR] You don't have permission to use this route");
-        return true;
-    }
-
-
+    /** Retorna o estado atual do giveaway em cache */
     get info() {
         return this.giveaway;
     }
 
+    /**
+     * Atualiza as informações do giveaway na API.
+     * 
+     * @returns Informações atualizadas do giveaway.
+     * @throws {Error} Se não houver permissão para leitura.
+     */
     public async fetchInfo() {
-        this.checkPermissions("GIVEAWAY.INFO.READ");
+        const data = await this.helper.send<ErisCliGiveawayInfo>({
+            method: "GET",
+            url: `${BASEURL}/giveaway/info/${this.giveaway.id}`
+        }, "GIVEAWAY.INFO.READ", this.cache);
 
-        const response = await axios.get(`${BASEURL}/giveaway/info/${this.giveaway.id}`, {
-            headers: {
-                Authorization: this.token
-            }
-        });
-
-        const data = response.data as ErisCliGiveawayInfo;
-
-        const normalizedData = {
+        this.giveaway = {
             ...data,
             expiresAt: new Date(data.expiresAt)
-        }
+        };
 
-        this.giveaway = normalizedData;
-        return normalizedData;
+        return this.giveaway;
     }
 
+    /**
+     * Aguarda o término do giveaway.
+     * Atualiza automaticamente o estado do giveaway a cada 10 segundos até faltarem menos de 5 minutos, depois aguarda o tempo restante.
+     * 
+     * @example
+     * ```ts
+     * const giveaway = new GiveawayRoutes(token, giveawayData);
+     * const finalState = await giveaway.waitForEnd();
+     * console.log(finalState.ended); // true
+     * ```
+     * 
+     * @returns Estado final do giveaway.
+     * @throws {Error} Se o giveaway já tiver terminado ou expirado.
+     */
     public async waitForEnd() {
-        this.checkPermissions("GIVEAWAY.INFO.READ");
-        
         if (this.giveaway.ended)
             throw new Error("[ERIS API CLI ERROR] To use waitForEnd, the giveaway cannot be ended");
 
@@ -57,7 +80,7 @@ export class GiveawayRoutes {
 
         let result = this.giveaway;
 
-        // Atualiza a cada 10 segundos até faltar menos de 5 minutos
+        // Atualiza a cada 10s até faltar menos de 5min
         while (result.expiresAt.getTime() - Date.now() > 5 * 60 * 1000) {
             await new Promise(resolve => setTimeout(resolve, 10_000));
             result = await this.fetchInfo();
@@ -68,8 +91,6 @@ export class GiveawayRoutes {
             await new Promise(resolve => setTimeout(resolve, remaining));
 
         result = await this.fetchInfo();
-
         return result;
     }
-
 }

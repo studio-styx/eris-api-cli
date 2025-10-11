@@ -1,6 +1,6 @@
-import axios from "axios";
 import { BASEURL } from "../index.js";
 import { CacheRoute } from "../cache.js";
+import { RequestHelper } from "../helpers/requestHelper.js";
 
 type VotesData = {
     id: number;
@@ -8,46 +8,69 @@ type VotesData = {
     createdAt: Date;
     applicationId: string;
     origin: "SERVER" | "WEBSITE";
-}[]
+}[];
 
+/**
+ * Rotas para o bot logado (me).
+ * Permite consultar saldo e votos.
+ * 
+ * @example
+ * ```ts
+ * const me = new MeRoutes("TOKEN");
+ * 
+ * // Consultar saldo
+ * const balance = await me.balance();
+ * console.log(balance);
+ * 
+ * // Consultar votos
+ * const votes = await me.votes();
+ * console.log(votes.votes, votes.data);
+ * ```
+ */
 export class MeRoutes {
-    private token: string;
-    private cache: CacheRoute = new CacheRoute();
+    private cache: CacheRoute;
+    private helper: RequestHelper;
 
-    constructor(token: string, cache?: CacheRoute) {
-        this.token = token;
-        if (cache) this.cache = cache;
+    constructor(token: string, cache?: CacheRoute, debug = false) {
+        this.cache = cache ?? new CacheRoute();
+        this.helper = new RequestHelper(token, debug);
     }
 
-    public async balance() {
-        const botPerms = this.cache.get("permissions") as string[] | undefined;
+    /** Obtém o saldo atual do bot */
+    /**
+     * Obtém o saldo atual do bot.
+     * Usa cache interno de 20 segundos.
+     * 
+     * @returns Número de STX disponíveis.
+     * @throws {Error} Se não houver permissão ou falhar a requisição.
+     */
+    public async balance(): Promise<number> {
+        const cached = this.cache.get("money") as number | undefined;
+        if (cached) return cached;
 
-        if (botPerms && (!botPerms.includes(`ECONOMY.READ`) || !botPerms.includes("ALL"))) throw new Error("[ERIS API CLI ERROR] You don't have permission to use this route")
+        const data = await this.helper.send<{ money: number }>(
+            { url: `${BASEURL}/economy/balance`, method: "GET" },
+            "ECONOMY.READ",
+            this.cache
+        );
 
-        const money = this.cache.get("money") as number | undefined;
-
-        if (money) return money;
-
-        const response = await axios.get(`${BASEURL}/economy/balance`, {
-            headers: {
-                Authorization: this.token
-            },
-        });
-
-        const data = response.data as { money: number };
-
-        this.cache.set("money", data.money, 20 * 1000)
-
-        return data.money
+        this.cache.set("money", data.money, 20 * 1000);
+        return data.money;
     }
 
+     /**
+     * Obtém total de votos e histórico.
+     * 
+     * @returns Objeto com total de votos e array de votos detalhados.
+     * @throws {Error} Se não houver permissão ou falhar a requisição.
+     */
     public async votes() {
-        const response = await axios.get(`${BASEURL}/botlist/votes`, {
-            headers: {
-                Authorization: this.token
-            },
-        });
+        const data = await this.helper.send<{ votes: number; data: VotesData }>(
+            { url: `${BASEURL}/botlist/votes`, method: "GET" },
+            "BOTLIST.READ",
+            this.cache
+        );
 
-        return response.data as { votes: number, data: VotesData }
+        return data;
     }
 }

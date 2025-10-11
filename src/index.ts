@@ -1,4 +1,3 @@
-import axios from "axios";
 import { MeRoutes } from "./routes/meRoutes.js";
 import { TryviaRoutes } from "./routes/tryviaRoutes.js";
 import { UserRoutes } from "./routes/users.js";
@@ -6,79 +5,115 @@ import { ErisCliGiveawayInfo, UserTransaction } from "./types.js";
 import { TransactionRoute } from "./routes/transactionRoutes.js";
 import { GiveawayRoutes } from "./routes/giveawayRoutes.js";
 import { CacheRoute } from "./cache.js";
+import { RequestHelper } from "./helpers/requestHelper.js";
 
 export const BASEURL = "https://apieris.squareweb.app/v2";
 
+/**
+ * Classe principal da SDK ErisApiCli
+ *
+ * Permite acessar todas as rotas da API: usuários, giveaways, transações, saldo e tryvia.
+ *
+ * @example
+ * ```ts
+ * const cli = new ErisApiCli("TOKEN_DO_BOT");
+ * 
+ * // Inicializa cache local
+ * await cli.initCache();
+ * 
+ * // Consultar seu próprio saldo
+ * const money = await cli.me.balance();
+ * 
+ * // Enviar STX para outro usuário
+ * const tx = await cli.user("12345").giveStx({
+ *   amount: 10,
+ *   channelId: "123",
+ *   guildId: "456",
+ *   reason: "Teste",
+ *   expiresAt: "1m"
+ * });
+ * 
+ * const result = await tx.waitForConfirmation();
+ * console.log(result);
+ * ```
+ */
 export class ErisApiCli {
     private token: string;
+    private debug: boolean = false;
     private cache: CacheRoute = new CacheRoute();
+    private helper: RequestHelper;
 
-    constructor(token: string) {
+    constructor(token: string, debug: boolean = false) {
         this.token = token;
+        this.debug = debug;
+        this.helper = new RequestHelper(token, debug);
     }
 
+    /**
+     * Inicializa o cache do bot carregando dados da API
+     * @returns Dados de cache carregados { money, permissions, giveaways }
+     */
     public async initCache() {
-        const response = await axios.get(`${BASEURL}/cache`, {
-            headers: {
-                Authorization: this.token
-            }
-        }).catch(() => null);
+        try {
+            const data = await this.helper.send<{
+                money: number;
+                permissions: string[];
+                giveaways: ErisCliGiveawayInfo[];
+            }>({ url: `${BASEURL}/cache`, method: "GET" }, "ALL", this.cache);
 
-        if (!response) return;
-        const data = response.data as {
-            money: number;
-            permissions: string[];
-            giveaways: ErisCliGiveawayInfo[];
-        };
+            this.cache.set("money", data.money, 20 * 1000);
+            this.cache.set("permissions", data.permissions, 1000 * 60 * 60);
+            this.cache.set("giveaways", data.giveaways, 1000 * 60 * 2);
 
-        const cache = new CacheRoute()
-
-        cache.set("money", data.money, 20 * 1000);
-        cache.set("permissions", data.permissions, 1000 * 60 * 60);
-        cache.set("giveaways", data.giveaways, 1000 * 60 * 2);
-
-        this.cache = cache;
-
-        return data;
+            return data;
+        } catch {
+            return null;
+        }
     }
 
+    /** Retorna uma instância de UserRoutes para o usuário especificado */
     get user() {
-        return (userId: string) => new UserRoutes(this.token, userId, this.cache);
+        return (userId: string) => new UserRoutes(this.token, userId, this.cache, this.debug);
     }
 
+    /** Retorna instância de MeRoutes para consultar dados do bot/usuário */
     get me() {
-        return new MeRoutes(this.token, this.cache);
+        return new MeRoutes(this.token, this.cache, this.debug);
     }
 
+    /** Retorna instância de TryviaRoutes */
     get tryvia() {
         return new TryviaRoutes(this.token);
     }
 
+    /**
+     * Retorna instância de TransactionRoute para uma transação específica
+     * @param id ID da transação
+     */
     public async transaction(id: number) {
-        const response = await axios.get(`${BASEURL}/transaction/${id}`, {
-            headers: {
-                Authorization: this.token
-            }
-        });
+        const data = await this.helper.send<{ data: UserTransaction }>(
+            { url: `${BASEURL}/transaction/${id}`, method: "GET" },
+            "ECONOMY.READ",
+            this.cache
+        );
 
-        const data = response.data.data as UserTransaction;
-
-        return new TransactionRoute(this.token, data, this.cache)
+        return new TransactionRoute(this.token, data.data, this.cache, this.debug);
     }
 
+    /**
+     * Retorna instância de GiveawayRoutes para um giveaway específico
+     * @param id ID do giveaway
+     */
     public async giveaway(id: number) {
-        const response = await axios.get(`${BASEURL}/giveaway/info/${id}`, {
-            headers: {
-                Authorization: this.token
-            }
-        });
+        const data = await this.helper.send<ErisCliGiveawayInfo>(
+            { url: `${BASEURL}/giveaway/info/${id}`, method: "GET" },
+            "GIVEAWAY.INFO.READ",
+            this.cache
+        );
 
-        const data = response.data as ErisCliGiveawayInfo;
-
-        return new GiveawayRoutes(this.token, data, this.cache);
+        return new GiveawayRoutes(this.token, data, this.cache, this.debug);
     }
 }
 
-export * from "./types.js"
-
+export * from "./types.js";
 export default ErisApiCli;
