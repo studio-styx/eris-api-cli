@@ -12,8 +12,9 @@ type TakeStxAndGiveStxRequestData = {
 };
 
 type TakeStxAndGiveStxRequestExpiresAtData =
-    | "1m" | "5m" | "10m" | "20m" | "30m" | "60m"
-    | "1h" | "2h" | "4h" | "8h" | "12h" | "24h";
+    "1m" | "2m" | "3m" | "4m" | "5m" | "10m" | 
+    "15m" | "20m" | "30m" | "45m" | "60m" | "1h"
+    | "2h" | "4h" | "6h" | "8h" | "12h" | "24h";
 
 
 /**
