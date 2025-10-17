@@ -54,8 +54,8 @@ export class ErisApiCli {
         this.token = token;
         this.debug = debug;
         this.helper = new RequestHelper(token, debug);
-        // Verifica a versão ao instanciar a classe
-        checkVersion(version);
+        // Verifica a versão em segundo plano
+        void checkVersion(version);
     }
 
     /**
