@@ -6,6 +6,13 @@ import { TransactionRoute } from "./routes/transactionRoutes.js";
 import { GiveawayRoutes } from "./routes/giveawayRoutes.js";
 import { CacheRoute } from "./cache.js";
 import { RequestHelper } from "./helpers/requestHelper.js";
+import { checkVersion } from "./checkVersion.js";
+import { readFileSync } from "fs";
+import { join } from "path";
+
+// Lê a versão do package.json dinamicamente
+const packageJson = JSON.parse(readFileSync(join(__dirname, "../package.json"), "utf-8"));
+const { version } = packageJson;
 
 export const BASEURL = "https://apieris.squareweb.app/v2";
 
@@ -47,6 +54,8 @@ export class ErisApiCli {
         this.token = token;
         this.debug = debug;
         this.helper = new RequestHelper(token, debug);
+        // Verifica a versão ao instanciar a classe
+        checkVersion(version);
     }
 
     /**
