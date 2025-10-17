@@ -1,15 +1,15 @@
 {
   "compilerOptions": {
-    "target": "ES2020",
-    "module": "ESNext",
-    "moduleResolution": "node",
-    "lib": ["ES2020"],
+    "target": "ESNext",  // Atualizado para máximo suporte moderno (em vez de ES2020)
+    "module": "nodenext",  // Emite ESM compatível com Node.js ESM
+    "moduleResolution": "nodenext",  // Resolve módulos como Node.js moderno (com extensões)
+    "lib": ["ESNext"],  // Atualizado para incluir tudo de ES2020+
     "declaration": true,
     "declarationMap": true,
     "outDir": "./dist",
     "rootDir": "./src",
     "strict": true,
-    "esModuleInterop": true,
+    "esModuleInterop": true,  // Ajuda em interop com CommonJS se necessário
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true

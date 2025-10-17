@@ -148,7 +148,7 @@ console.log(status); // "PENDING" | "CONFIRMED" | "CANCELLED" | "EXPIRED" | "DEL
 ## Tipos principais
 
 ```ts
-import { UserTransaction, ErisCliGiveawayInfo } from "eris-api-cli";
+import { UserTransaction, ErisCliGiveawayInfo } from "@studiostyx/erisbot-cli";
 ```
 
 * `UserTransaction` – detalhes de cada transação.
@@ -171,7 +171,7 @@ A SDK usa `CacheRoute` para armazenar:
 ## Exemplo completo
 
 ```ts
-const cli = new ErisApiCli("TOKEN_DO_BOT", true);
+const cli = new ErisApiCli("TOKEN_DO_BOT", true); // true serve para ativar o debug
 await cli.initCache();
 
 // Consultar saldo
