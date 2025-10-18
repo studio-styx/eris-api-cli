@@ -89,7 +89,7 @@ export class TransactionRoute {
          * @returns {Promise<"PENDING" | "CONFIRMED" | "CANCELLED" | "EXPIRED" | "DELETED">}
      */
     /** Aguarda confirmação da transação, com timeout baseado no expiresAt */
-    public async waitForConfirmation(): Promise<TransactionStatus | "DELETED"> {
+    public async waitForCompletion(): Promise<TransactionStatus | "DELETED"> {
         const tx = this.transaction;
 
         if (tx.status !== "PENDING")

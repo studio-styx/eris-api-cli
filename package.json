@@ -1,6 +1,6 @@
 {
   "name": "@studiostyx/erisbot-cli",
-  "version": "0.2.9",
+  "version": "0.3.0",
   "description": "A cli to connect to the erisbot api",
   "license": "MIT",
   "author": "birdtool",

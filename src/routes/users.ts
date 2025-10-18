@@ -158,7 +158,7 @@ export class UserRoutes {
      * @returns Objeto com `money` e `bank` ou false.
      * @throws {Error} Se a rota não puder ser acessada ou ocorrer erro na requisição.
      */
-    public async balance(throwError = true): Promise<{ money: number; bank: number } | false> {
+    public async getBalance(throwError = true): Promise<{ money: number; bank: number } | false> {
         try {
             const data = await this.helper.send<{ money: number; bank: number }>({
                 method: "GET",
@@ -187,7 +187,7 @@ export class UserRoutes {
      * @returns Array de transações ou false.
      * @throws {Error} Se a rota não puder ser acessada ou ocorrer erro na requisição.
      */
-    public async transactions(body?: { limit?: number; timeLimit?: Date }, throwError = true): Promise<TransactionRoute[] | false> {
+    public async getTransactions(body?: { limit?: number; timeLimit?: Date }, throwError = true): Promise<TransactionRoute[] | false> {
         const limit = body?.limit ?? 25;
         const timeQuery = body?.timeLimit ? `&timeLimit=${body.timeLimit.toISOString()}` : "";
 

@@ -71,7 +71,7 @@ export class GiveawayRoutes {
      * @returns Estado final do giveaway.
      * @throws {Error} Se o giveaway já tiver terminado ou expirado.
      */
-    public async waitForEnd() {
+    public async waitForCompletion() {
         if (this.giveaway.ended)
             throw new Error("[ERIS API CLI ERROR] To use waitForEnd, the giveaway cannot be ended");
 

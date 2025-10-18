@@ -81,46 +81,50 @@ export class ErisApiCli {
     }
 
     /** Retorna uma instância de UserRoutes para o usuário especificado */
-    get user() {
-        return (userId: string) => new UserRoutes(this.token, userId, this.cache, this.debug);
+    get users() {
+        return {
+            /** Inicializa um objeto de user para o id fornecido, atenção: essa rota não pega informações do usuário, apenas sua classe */
+            get: (userId: string) => new UserRoutes(this.token, userId, this.cache, this.debug)
+        };
     }
 
-    /** Retorna instância de MeRoutes para consultar dados do bot/usuário */
-    get me() {
+    /** Retorna uma instância de MeRoutes para pegar informações da aplicação consumidora */
+    get bot() {
         return new MeRoutes(this.token, this.cache, this.debug);
     }
 
-    /** Retorna instância de TryviaRoutes */
+    /** Rotas de transações */
+    get transactions() {
+        return {
+            /** Pega informações de uma transação */
+            get: async (id: number) => {
+                const data = await this.helper.send<{ data: UserTransaction }>(
+                    { url: `${BASEURL}/transaction/${id}`, method: "GET" },
+                    "ECONOMY.READ",
+                    this.cache
+                );
+                return new TransactionRoute(this.token, data.data, this.cache, this.debug);
+            }
+        };
+    }
+
+    /** Pega informações de um sorteio */
+    get giveaways() {
+        return {
+            /** Pega informações de um sorteio */
+            get: async (id: number) => {
+                const data = await this.helper.send<ErisCliGiveawayInfo>(
+                    { url: `${BASEURL}/giveaway/info/${id}`, method: "GET" },
+                    "GIVEAWAY.INFO.READ",
+                    this.cache
+                );
+                return new GiveawayRoutes(this.token, data, this.cache, this.debug);
+            }
+        };
+    }
+
     get tryvia() {
         return new TryviaRoutes(this.token);
-    }
-
-    /**
-     * Retorna instância de TransactionRoute para uma transação específica
-     * @param id ID da transação
-     */
-    public async transaction(id: number) {
-        const data = await this.helper.send<{ data: UserTransaction }>(
-            { url: `${BASEURL}/transaction/${id}`, method: "GET" },
-            "ECONOMY.READ",
-            this.cache
-        );
-
-        return new TransactionRoute(this.token, data.data, this.cache, this.debug);
-    }
-
-    /**
-     * Retorna instância de GiveawayRoutes para um giveaway específico
-     * @param id ID do giveaway
-     */
-    public async giveaway(id: number) {
-        const data = await this.helper.send<ErisCliGiveawayInfo>(
-            { url: `${BASEURL}/giveaway/info/${id}`, method: "GET" },
-            "GIVEAWAY.INFO.READ",
-            this.cache
-        );
-
-        return new GiveawayRoutes(this.token, data, this.cache, this.debug);
     }
 }
 

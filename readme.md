@@ -49,7 +49,7 @@ console.log(cacheData.money); // saldo do bot
 Permite manipular saldo de usuários e consultar informações:
 
 ```ts
-const user = cli.user("12345");
+const user = cli.users.get("12345");
 
 // Dar STX a um usuário
 const tx = await user.giveStx({
@@ -61,7 +61,7 @@ const tx = await user.giveStx({
 });
 
 // Esperar confirmação da transação
-const result = await tx.waitForConfirmation();
+const result = await tx.waitForCompletion();
 console.log(result); // "CONFIRMED" | "CANCELLED" | "EXPIRED"
 ```
 
@@ -69,8 +69,8 @@ console.log(result); // "CONFIRMED" | "CANCELLED" | "EXPIRED"
 
 * `giveStx(data, throwError?)` – Envia STX do bot para o usuário.
 * `takeStx(data, throwError?)` – Retira STX do usuário.
-* `balance(throwError?)` – Retorna saldo do usuário.
-* `transactions(body?, throwError?)` – Lista transações do usuário.
+* `getBalance(throwError?)` – Retorna saldo do usuário.
+* `getTransactions(body?, throwError?)` – Lista transações do usuário.
 * `fetchInfo(throwError?)` – Retorna informações completas do usuário.
 
 > `throwError` opcional: define se erros retornam `false` ou lançam exceção.
@@ -79,13 +79,13 @@ console.log(result); // "CONFIRMED" | "CANCELLED" | "EXPIRED"
 
 ### Me (`cli.me`)
 
-Para consultar informações do próprio bot/usuário autenticado.
+Para consultar informações do próprio bot autenticado.
 
 ```ts
-const balance = await cli.me.balance();
+const balance = await cli.bot.balance();
 console.log(balance); // número
 
-const votes = await cli.me.votes();
+const votes = await cli.bot.votes();
 console.log(votes); // { votes: number, data: VotesData[] }
 ```
 
@@ -116,13 +116,13 @@ const questions = await cli.tryvia.getTryviaQuestions({
 Rotas para consultar giveaways específicos.
 
 ```ts
-const giveaway = await cli.giveaway(123);
+const giveaway = await cli.giveaways.get(123);
 
 // Buscar info atualizada
 const info = await giveaway.fetchInfo();
 
 // Esperar término
-const ended = await giveaway.waitForEnd();
+const ended = await giveaway.waitForCompletion();
 console.log(ended);
 ```
 
@@ -133,13 +133,13 @@ console.log(ended);
 Permite manipular transações específicas.
 
 ```ts
-const tx = await cli.transaction(987);
+const tx = await cli.transactions.get(987);
 
 // Atualizar informações da transação
 const updated = await tx.fetchInfo();
 
 // Esperar confirmação
-const status = await tx.waitForConfirmation();
+const status = await tx.waitForCompletion();
 console.log(status); // "PENDING" | "CONFIRMED" | "CANCELLED" | "EXPIRED" | "DELETED"
 ```
 
@@ -175,11 +175,11 @@ const cli = new ErisApiCli("TOKEN_DO_BOT", true); // true serve para ativar o de
 await cli.initCache();
 
 // Consultar saldo
-const balance = await cli.me.balance();
+const balance = await cli.bot.balance();
 console.log("Saldo do bot:", balance);
 
 // Dar STX a um usuário
-const tx = await cli.user("12345").giveStx({
+const tx = await cli.users.get("12345").giveStx({
   guildId: "456",
   channelId: "123",
   amount: 10,
@@ -188,11 +188,11 @@ const tx = await cli.user("12345").giveStx({
 });
 
 // Esperar confirmação
-const result = await tx.waitForConfirmation();
+const result = await tx.waitForCompletion();
 console.log("Resultado da transação:", result);
 
 // Consultar giveaway
-const giveaway = await cli.giveaway(123);
+const giveaway = await cli.giveaways.get(123);
 const cachedInformation = giveaway.info; // São as informações do sorteio baseadas no momento que cli.giveaway foi iniciada
 const atualizedInformation = await giveaway.fetchInfo(); // também atualiza no cache
 console.log({ cache: cachedInformation, fetched: atualizedInformation });
