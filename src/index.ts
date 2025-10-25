@@ -45,7 +45,7 @@ export const BASEURL = "https://apieris.squareweb.app/v2";
  * console.log(result);
  * ```
  */
-export class ErisApiCli {
+export class ErisApiSdk {
     private token: string;
     private debug: boolean = false;
     private cache: CacheRoute = new CacheRoute();
@@ -131,4 +131,4 @@ export class ErisApiCli {
 
 export * from "./types.js";
 export * from "./error.js"
-export default ErisApiCli;
+export default ErisApiSdk;
