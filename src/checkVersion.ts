@@ -36,10 +36,10 @@ export async function checkVersion(currentVersion: string): Promise<void> {
 
         if (currentVersion < minimalRequired) {
             console.warn(
-                `⚠️ [ERIS API CLI WARN] Versão ${currentVersion} está obsoleta. Atualize para ${data.sdk.version.latest} ou superior com: npm install @studiostyx/erisbot-cli@latest. Veja as novidades em: https://github.com/studiostyx/erisbot-cli/releases`
+                `⚠️ [ERIS API SDK WARN] Versão ${currentVersion} está obsoleta. Atualize para ${data.sdk.version.latest} ou superior com: npm install @studiostyx/erisbot-sdk@latest. Veja as novidades em: https://github.com/studiostyx/erisbot-cli/releases`
             );
         }
     } catch (error: any) {
-        console.error(`[ERIS API CLI ERROR] Falha ao verificar atualizações: ${error.message}`);
+        console.error(`[ERIS API SDK ERROR] Falha ao verificar atualizações: ${error.message}`);
     }
 }

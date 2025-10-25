@@ -1,7 +1,6 @@
 import { MeRoutes } from "./routes/meRoutes.js";
 import { TryviaRoutes } from "./routes/tryviaRoutes.js";
 import { UserRoutes } from "./routes/users.js";
-import { ErisCliGiveawayInfo, UserTransaction } from "./types.js";
 import { TransactionRoute } from "./routes/transactionRoutes.js";
 import { GiveawayRoutes } from "./routes/giveawayRoutes.js";
 import { CacheRoute } from "./cache.js";
@@ -9,6 +8,7 @@ import { RequestHelper } from "./helpers/requestHelper.js";
 import { checkVersion } from "./checkVersion.js";
 import { readFileSync } from "fs";
 import { join } from "path";
+import { ErisApiSdkGiveawayInfo, ErisApiSdkUserTransaction } from "./types.js";
 
 // Lê a versão do package.json dinamicamente
 const packageJson = JSON.parse(readFileSync(join(__dirname, "../package.json"), "utf-8"));
@@ -29,10 +29,10 @@ export const BASEURL = "https://apieris.squareweb.app/v2";
  * await cli.initCache();
  * 
  * // Consultar seu próprio saldo
- * const money = await cli.me.balance();
+ * const money = await cli.me.getBalance();
  * 
  * // Enviar STX para outro usuário
- * const tx = await cli.user("12345").giveStx({
+ * const tx = await cli.users.get("12345").balance.give({
  *   amount: 10,
  *   channelId: "123",
  *   guildId: "456",
@@ -67,7 +67,7 @@ export class ErisApiCli {
             const data = await this.helper.send<{
                 money: number;
                 permissions: string[];
-                giveaways: ErisCliGiveawayInfo[];
+                giveaways: ErisApiSdkGiveawayInfo[];
             }>({ url: `${BASEURL}/cache`, method: "GET" }, "ALL", this.cache);
 
             this.cache.set("money", data.money, 20 * 1000);
@@ -98,7 +98,7 @@ export class ErisApiCli {
         return {
             /** Pega informações de uma transação */
             get: async (id: number) => {
-                const data = await this.helper.send<{ data: UserTransaction }>(
+                const data = await this.helper.send<{ data: ErisApiSdkUserTransaction }>(
                     { url: `${BASEURL}/transaction/${id}`, method: "GET" },
                     "ECONOMY.READ",
                     this.cache
@@ -113,7 +113,7 @@ export class ErisApiCli {
         return {
             /** Pega informações de um sorteio */
             get: async (id: number) => {
-                const data = await this.helper.send<ErisCliGiveawayInfo>(
+                const data = await this.helper.send<ErisApiSdkGiveawayInfo>(
                     { url: `${BASEURL}/giveaway/info/${id}`, method: "GET" },
                     "GIVEAWAY.INFO.READ",
                     this.cache
@@ -129,4 +129,5 @@ export class ErisApiCli {
 }
 
 export * from "./types.js";
+export * from "./error.js"
 export default ErisApiCli;

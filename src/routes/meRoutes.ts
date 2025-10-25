@@ -36,15 +36,14 @@ export class MeRoutes {
         this.helper = new RequestHelper(token, debug);
     }
 
-    /** Obtém o saldo atual do bot */
     /**
      * Obtém o saldo atual do bot.
-     * Usa cache interno de 20 segundos.
+     * Usa cache interno de 20 segundos, ou pega da api.
      * 
      * @returns Número de STX disponíveis.
      * @throws {Error} Se não houver permissão ou falhar a requisição.
      */
-    public async balance(): Promise<number> {
+    public async getBalance(): Promise<number> {
         const cached = this.cache.get("money") as number | undefined;
         if (cached) return cached;
 
@@ -64,7 +63,7 @@ export class MeRoutes {
      * @returns Objeto com total de votos e array de votos detalhados.
      * @throws {Error} Se não houver permissão ou falhar a requisição.
      */
-    public async votes() {
+    public async getVotes() {
         const data = await this.helper.send<{ votes: number; data: VotesData }>(
             { url: `${BASEURL}/botlist/votes`, method: "GET" },
             "BOTLIST.READ",

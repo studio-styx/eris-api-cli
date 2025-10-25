@@ -1,4 +1,4 @@
-# ErisApiCli
+# ErisApiSdk
 
 SDK TypeScript/JavaScript para interagir com a API da Eris.  
 Permite gerenciar usuários, transações, giveaways, saldo do bot e sessões Tryvia.
@@ -8,13 +8,13 @@ Permite gerenciar usuários, transações, giveaways, saldo do bot e sessões Tr
 ## Instalação
 
 ```bash
-npm install @studiostyx/erisbot-cli
-````
+npm install @studiostyx/erisbot-sdk
+```
 
 ou
 
 ```bash
-yarn add @studiostyx/erisbot-cli
+yarn add @studiostyx/erisbot-sdk
 ```
 
 ---
@@ -22,37 +22,37 @@ yarn add @studiostyx/erisbot-cli
 ## Inicialização
 
 ```ts
-import ErisApiCli from "@studiostyx/erisbot-cli";
+import { ErisApiCli } from "@studiostyx/erisbot-sdk";
 
-const cli = new ErisApiCli("TOKEN_DO_BOT", true); // true ativa debug
-await cli.initCache();
+const sdk = new ErisApiCli("TOKEN_DO_BOT", true); // true ativa debug
+await sdk.initCache();
 ```
 
 ---
 
 ## Cache
 
-O SDK mantém um cache local para permissões, saldo e giveaways.
-`initCache()` carrega dados iniciais da API.
+O SDK mantém um cache local para saldo, permissões e giveaways.  
+`initCache()` carrega os dados iniciais da API.
 
 ```ts
-const cacheData = await cli.initCache();
-console.log(cacheData.money); // saldo do bot
+const cacheData = await sdk.initCache();
+console.log(cacheData?.money); // saldo do bot
 ```
 
 ---
 
 ## Rotas principais
 
-### Usuário (`cli.user(userId)`)
+### Usuário (`sdk.users.get(userId)`)
 
-Permite manipular saldo de usuários e consultar informações:
+Permite manipular saldo de usuários e consultar informações.
 
 ```ts
-const user = cli.users.get("12345");
+const user = sdk.users.get("12345");
 
 // Dar STX a um usuário
-const tx = await user.giveStx({
+const tx = await user.balance.give({
   guildId: "456",
   channelId: "123",
   amount: 10,
@@ -62,14 +62,14 @@ const tx = await user.giveStx({
 
 // Esperar confirmação da transação
 const result = await tx.waitForCompletion();
-console.log(result); // "CONFIRMED" | "CANCELLED" | "EXPIRED"
+console.log(result); // "CONFIRMED" | "CANCELLED" | "EXPIRED" | "DELETED"
 ```
 
 #### Métodos
 
-* `giveStx(data, throwError?)` – Envia STX do bot para o usuário.
-* `takeStx(data, throwError?)` – Retira STX do usuário.
-* `getBalance(throwError?)` – Retorna saldo do usuário.
+* `balance.give(data, throwError?)` – Envia STX do bot para o usuário.
+* `balance.receive(data, throwError?)` – Retira STX do usuário.
+* `balance.get(throwError?)` – Retorna saldo do usuário.
 * `getTransactions(body?, throwError?)` – Lista transações do usuário.
 * `fetchInfo(throwError?)` – Retorna informações completas do usuário.
 
@@ -77,30 +77,30 @@ console.log(result); // "CONFIRMED" | "CANCELLED" | "EXPIRED"
 
 ---
 
-### Me (`cli.me`)
+### Bot (`sdk.bot`)
 
-Para consultar informações do próprio bot autenticado.
+Consulta informações do próprio bot autenticado.
 
 ```ts
-const balance = await cli.bot.balance();
+const balance = await sdk.bot.getBalance();
 console.log(balance); // número
 
-const votes = await cli.bot.votes();
+const votes = await sdk.bot.getVotes();
 console.log(votes); // { votes: number, data: VotesData[] }
 ```
 
 ---
 
-### Tryvia (`cli.tryvia`)
+### Tryvia (`sdk.tryvia`)
 
-Rotas para criar sessões e pegar questões Tryvia.
+Rotas para criar sessões e obter questões Tryvia.
 
 ```ts
 // Gerar token de sessão
-const session = await cli.tryvia.getSessionToken();
+const session = await sdk.tryvia.getSessionToken();
 
-// Pegar questões
-const questions = await cli.tryvia.getTryviaQuestions({
+// Obter questões
+const questions = await sdk.tryvia.getTryviaQuestions({
   sessionToken: session.token,
   amount: 5,
   difficulty: "EASY",
@@ -111,14 +111,14 @@ const questions = await cli.tryvia.getTryviaQuestions({
 
 ---
 
-### Giveaway (`cli.giveaway(id)`)
+### Giveaway (`sdk.giveaways.get(id)`)
 
-Rotas para consultar giveaways específicos.
+Consulta informações de giveaways específicos.
 
 ```ts
-const giveaway = await cli.giveaways.get(123);
+const giveaway = await sdk.giveaways.get(123);
 
-// Buscar info atualizada
+// Buscar informações atualizadas
 const info = await giveaway.fetchInfo();
 
 // Esperar término
@@ -128,14 +128,14 @@ console.log(ended);
 
 ---
 
-### Transações (`cli.transaction(id)`)
+### Transações (`sdk.transactions.get(id)`)
 
-Permite manipular transações específicas.
+Manipula transações específicas.
 
 ```ts
-const tx = await cli.transactions.get(987);
+const tx = await sdk.transactions.get(987);
 
-// Atualizar informações da transação
+// Atualizar informações
 const updated = await tx.fetchInfo();
 
 // Esperar confirmação
@@ -148,38 +148,40 @@ console.log(status); // "PENDING" | "CONFIRMED" | "CANCELLED" | "EXPIRED" | "DEL
 ## Tipos principais
 
 ```ts
-import { UserTransaction, ErisCliGiveawayInfo } from "@studiostyx/erisbot-cli";
+import { ErisApiSdkUserTransaction, ErisApiSdkGiveawayInfo, ErisApiSdkUserInfoFull } from "@studiostyx/erisbot-sdk";
 ```
 
-* `UserTransaction` – detalhes de cada transação.
-* `ErisCliGiveawayInfo` – informações de giveaways.
-* `UserInfoFull` – dados completos de um usuário.
-* `TakeStxAndGiveStxRequestData` – formato para enviar/retirar STX.
+* `ErisApiSdkUserTransaction` – Detalhes de cada transação.
+* `ErisApiSdkGiveawayInfo` – Informações de giveaways.
+* `ErisApiSdkUserInfoFull` – Dados completos de um usuário.
+* `TakeStxAndGiveStxRequestData` – Formato para enviar/retirar STX.
 
 ---
 
 ## Cache interno
 
-A SDK usa `CacheRoute` para armazenar:
+O SDK usa `CacheRoute` para armazenar:
 
-* `money` – saldo do bot ou usuário.
-* `permissions` – permissões do bot.
-* `giveaways` – giveaways recentes.
+* `money` – Saldo do bot ou usuário.
+* `permissions` – Permissões do bot.
+* `giveaways` – Giveaways recentes.
 
 ---
 
 ## Exemplo completo
 
 ```ts
-const cli = new ErisApiCli("TOKEN_DO_BOT", true); // true serve para ativar o debug
-await cli.initCache();
+import { ErisApiCli } from "@studiostyx/erisbot-sdk";
 
-// Consultar saldo
-const balance = await cli.bot.balance();
+const sdk = new ErisApiCli("TOKEN_DO_BOT", true); // true ativa debug
+await sdk.initCache();
+
+// Consultar saldo do bot
+const balance = await sdk.bot.getBalance();
 console.log("Saldo do bot:", balance);
 
 // Dar STX a um usuário
-const tx = await cli.users.get("12345").giveStx({
+const tx = await sdk.users.get("12345").balance.give({
   guildId: "456",
   channelId: "123",
   amount: 10,
@@ -192,24 +194,23 @@ const result = await tx.waitForCompletion();
 console.log("Resultado da transação:", result);
 
 // Consultar giveaway
-const giveaway = await cli.giveaways.get(123);
-const cachedInformation = giveaway.info; // São as informações do sorteio baseadas no momento que cli.giveaway foi iniciada
-const atualizedInformation = await giveaway.fetchInfo(); // também atualiza no cache
-console.log({ cache: cachedInformation, fetched: atualizedInformation });
+const giveaway = await sdk.giveaways.get(123);
+const cachedInfo = giveaway.info; // Informações em cache
+const updatedInfo = await giveaway.fetchInfo(); // Atualiza cache
+console.log({ cache: cachedInfo, fetched: updatedInfo });
 ```
 
 ---
 
 ## Observações
 
-* Todos os métodos que acessam a API usam `RequestHelper`, garantindo checagem de permissões, cache e tratamento de erros.
-* Métodos que retornam `false` ao invés de lançar erro podem ser utilizados para evitar try/catch em massa.
-* `debug` habilita log completo de erros.
+* Todos os métodos que acessam a API utilizam `RequestHelper` para gerenciar permissões, cache e erros.
+* Métodos com `throwError = false` retornam `false` em vez de lançar erros, facilitando o uso sem try/catch.
+* O modo `debug` habilita logs completos de erros.
+* Compatível com Node.js >=18 e TypeScript >=5.
 
 ---
 
 ## Contribuição
 
-Abra issues ou pull requests no GitHub.
-Compatível com Node.js >=18 e TypeScript >=5.
-
+Abra issues ou pull requests no [repositório GitHub](https://github.com/studiostyx/erisbot-sdk).

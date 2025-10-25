@@ -5,7 +5,6 @@
     "moduleResolution": "nodenext",  // Resolve módulos como Node.js moderno (com extensões)
     "lib": ["ESNext"],  // Atualizado para incluir tudo de ES2020+
     "declaration": true,
-    "declarationMap": true,
     "outDir": "./dist",
     "rootDir": "./src",
     "strict": true,
@@ -15,5 +14,5 @@
     "resolveJsonModule": true
   },
   "include": ["src/**/*"],
-  "exclude": ["node_modules", "dist", "**/*.test.ts"]
+  "exclude": ["node_modules", "dist", "**/*.test.ts", "examples/**/*"]
 }

@@ -1,13 +1,39 @@
-export type RequistionGenericType = {
+export type ErisApiSdkRequistionGenericType = {
     message: string;
     success: boolean;
 }
 
-export type UserLogsData = {
-    data: UserLogs
+export type ErisApiSdkUserLogsData = {
+    data: ErisApiSdkUserLogs
 }
 
-export type UserLogs = {
+export type ErisApiSdkErrorsCode = 
+    | "USER_NOT_FOUND"
+    | "INSUFFICIENT_FUNDS"
+    | "TRANSACTION_NOT_FOUND"
+    | "GIVEAWAY_NOT_FOUND"
+    | "GIVEAWAY_ALREADY_ENDED"
+    | "COMPANY_NOT_FOUND"
+    | "PET_NOT_FOUND"
+    | "FISH_NOT_FOUND"
+    | "STOCK_NOT_FOUND"
+    | "FISHING_ROD_NOT_FOUND"
+    | "COOLDOWN_NOT_FOUND"
+    | "USER_BLACKLISTED"
+    | "INVALID_REQUEST"
+    | "INTERNAL_SERVER_ERROR"
+    | "UNAUTHORIZED"
+    | "FORBIDDEN"
+    | "RATE_LIMITED"
+    | "NOT_FOUND"
+    | "BAD_REQUEST"
+    | "TRANSACTION_NOT_PENDING"
+    | "UNKNOWN_ERROR"
+    | "TRANSACTION_ERROR"
+    | "GIVEAWAY_ERROR"
+    | "TRANSACTION_NOT_APPROVED";
+
+export type ErisApiSdkUserLogs = {
     id: string;
     userId: string;
     message: string;
@@ -16,15 +42,15 @@ export type UserLogs = {
     timestamp: Date;
 }
 
-export type StxApiTransactionResponse = {
+export type ErisApiSdkStxApiTransactionResponse = {
     transactionId: number;
     success: true;
     message: "Transaction created";
-    data: UserTransaction;
+    data: ErisApiSdkUserTransaction;
     botBalance: number;
 }
 
-export type UserTransaction = {
+export type ErisApiSdkUserTransaction = {
     id: number;
     userId: string;
     targetId: string | null;
@@ -38,12 +64,12 @@ export type UserTransaction = {
     messageId: string | null;
     reason: string | null;
     type: "API" | "USER" | "ADMIN" | "BUY" | "SELL";
-    status: TransactionStatus
+    status: ErisApiSdkTransactionStatus
 }
 
-export type TransactionStatus = "PENDING" | "APPROVED" | "REJECTED" | "EXPIRED"
+export type ErisApiSdkTransactionStatus = "PENDING" | "APPROVED" | "REJECTED" | "EXPIRED"
 
-export type UserInfo = {
+export type ErisApiSdkUserInfo = {
     id: string;
     activePetId: number | null;
     money: number;
@@ -62,7 +88,7 @@ export type UserInfo = {
     mailsTagsIgnored: string[];
 }
 
-export type UserInfoPet = {
+export type ErisApiSdkUserInfoPet = {
     id: number;
     userId: string;
     name: string;
@@ -85,7 +111,7 @@ export type UserInfoPet = {
         trait: {
             id: number;
             name: string;
-            geneType: PetInfoGeneticsGeneType;
+            geneType: ErisApiSdkPetInfoGeneticsGeneType;
             personalityConflictNames: string[];
         };
     } & {
@@ -100,8 +126,8 @@ export type UserInfoPet = {
             createdAt: Date;
             updatedAt: Date;
             petId: number;
-            geneType: PetInfoGeneticsGeneType;
-            colorPart: PetInfoGeneticsColorPart;
+            geneType: ErisApiSdkPetInfoGeneticsGeneType;
+            colorPart: ErisApiSdkPetInfoGeneticsColorPart;
         };
     } & {
         id: number;
@@ -127,10 +153,10 @@ export type UserInfoPet = {
     })[];
 };
 
-export type PetInfoGeneticsGeneType = "DOMINANT" | "RECESSIVE" | "CODOMINANT" | "NEUTRAL";
-export type PetInfoGeneticsColorPart = "EYE" | "COLOR1" | "COLOR2"
+export type ErisApiSdkPetInfoGeneticsGeneType = "DOMINANT" | "RECESSIVE" | "CODOMINANT" | "NEUTRAL";
+export type ErisApiSdkPetInfoGeneticsColorPart = "EYE" | "COLOR1" | "COLOR2"
 
-export type UserInfoGiveaways = {
+export type ErisApiSdkUserInfoGiveaways = {
     id: number;
     createdAt: Date;
     userId: string;
@@ -138,19 +164,19 @@ export type UserInfoGiveaways = {
     isWinner: boolean;
 }[]
 
-export type ErisCliCompany = {
+export type ErisApiSdkCompany = {
     id: number;
     name: string;
     description: string | null;
     difficulty: number;
     experience: number;
     wage: number;
-    expectations: ErisCliCompanyExpectations;
+    expectations: ErisApiSdkCompanyExpectations;
 }
 
-export type ErisCliCompanyExpectations = string[] | { level: number, skill: string }[];
+export type ErisApiSdkCompanyExpectations = string[] | { level: number, skill: string }[];
 
-export type UserInfoCooldown = {
+export type ErisApiSdkUserInfoCooldown = {
     id: number;
     userId: string;
     name: string;
@@ -158,7 +184,7 @@ export type UserInfoCooldown = {
     willEndIn: Date;
 }
 
-export type UserInfoFishingRod = {
+export type ErisApiSdkUserInfoFishingRod = {
     id: number;
     createdAt: Date;
     userId: string;
@@ -166,21 +192,21 @@ export type UserInfoFishingRod = {
     durability: number;
 }
 
-export type UserInfoFish = {
+export type ErisApiSdkUserInfoFish = {
     id: number;
     userId: string;
     createdAt: Date;
     fishId: number;
 }
 
-export type UserInfoStock = {
+export type ErisApiSdkUserInfoStock = {
     id: number;
     userId: string;
     amount: number;
     stockId: number;
 }
 
-export type ErisCliGiveawatConnectedGuild = {
+export type ErisApiSdkGiveawayConnectedGuild = {
     id: number;
     guildId: string;
     channelId: string;
@@ -193,9 +219,9 @@ export type ErisCliGiveawatConnectedGuild = {
     xpRequired: number | null;
 }
 
-export type ErisCliGiveawayInfo = ({
-    participants: UserInfoGiveaways
-    connectedGuilds: ErisCliGiveawatConnectedGuild;
+export type ErisApiSdkGiveawayInfo = ({
+    participants: ErisApiSdkUserInfoGiveaways
+    connectedGuilds: ErisApiSdkGiveawayConnectedGuild;
     roleEntries: {
         id: number;
         giveawayId: number;
@@ -216,19 +242,19 @@ export type ErisCliGiveawayInfo = ({
 });
 
 export type ErisApiError = { message: string; success: false; errors?: { path: string; message: string }[] };
-export type UserInfoFull = UserInfo & {
-    stocks: UserInfoStock[];
-    fishs: UserInfoFish[];
-    fishingRods: UserInfoFishingRod[];
-    cooldowns: UserInfoCooldown[];
-    company: ErisCliCompany;
-    giveaways: UserInfoGiveaways[];
-    activePet: UserInfoPet | null;
-    pets: UserInfoPet[];
-    discord: ErisCliDiscordUserGeneric & any;
+export type ErisApiSdkUserInfoFull = ErisApiSdkUserInfo & {
+    stocks: ErisApiSdkUserInfoStock[];
+    fishs: ErisApiSdkUserInfoFish[];
+    fishingRods: ErisApiSdkUserInfoFishingRod[];
+    cooldowns: ErisApiSdkUserInfoCooldown[];
+    company: ErisApiSdkCompany;
+    giveaways: ErisApiSdkUserInfoGiveaways[];
+    activePet: ErisApiSdkUserInfoPet | null;
+    pets: ErisApiSdkUserInfoPet[];
+    discord: ErisApiSdkError & any;
 };
 
-export type ErisCliDiscordUserGeneric = {
+export type ErisApiSdkError = {
     id: string;
     username: string;
     discriminator: string;

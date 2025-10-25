@@ -1,5 +1,5 @@
-import { BASEURL } from "../index.js";
-import { ErisCliGiveawayInfo } from "../types.js";
+import { BASEURL, ErisSdkError } from "../index.js";
+import { ErisApiSdkGiveawayInfo } from "../types.js";
 import { CacheRoute } from "../cache.js";
 import { RequestHelper } from "../helpers/requestHelper.js";
 
@@ -22,11 +22,11 @@ import { RequestHelper } from "../helpers/requestHelper.js";
  * ```
  */
 export class GiveawayRoutes {
-    private giveaway: ErisCliGiveawayInfo;
+    private giveaway: ErisApiSdkGiveawayInfo;
     private cache: CacheRoute = new CacheRoute();
     private helper: RequestHelper;
 
-    constructor(token: string, giveaway: ErisCliGiveawayInfo, cache?: CacheRoute, debug: boolean = false) {
+    constructor(token: string, giveaway: ErisApiSdkGiveawayInfo, cache?: CacheRoute, debug: boolean = false) {
         this.giveaway = giveaway;
         if (cache) this.cache = cache;
         this.helper = new RequestHelper(token, debug);
@@ -44,7 +44,7 @@ export class GiveawayRoutes {
      * @throws {Error} Se não houver permissão para leitura.
      */
     public async fetchInfo() {
-        const data = await this.helper.send<ErisCliGiveawayInfo>({
+        const data = await this.helper.send<ErisApiSdkGiveawayInfo>({
             method: "GET",
             url: `${BASEURL}/giveaway/info/${this.giveaway.id}`
         }, "GIVEAWAY.INFO.READ", this.cache);
@@ -73,16 +73,16 @@ export class GiveawayRoutes {
      */
     public async waitForCompletion() {
         if (this.giveaway.ended)
-            throw new Error("[ERIS API CLI ERROR] To use waitForEnd, the giveaway cannot be ended");
+            throw new ErisSdkError("GIVEAWAY_ALREADY_ENDED", "To use waitForCompletion, the giveaway cannot be ended");
 
         if (this.giveaway.expiresAt < new Date())
-            throw new Error("[ERIS API CLI ERROR] To use waitForEnd, the giveaway cannot be expired");
+            throw new ErisSdkError("GIVEAWAY_ALREADY_ENDED", "To use waitForCompletion, the giveaway cannot be expired");
 
         let result = this.giveaway;
 
-        // Atualiza a cada 10s até faltar menos de 5min
+        // Atualiza a cada 60s até faltar menos de 5min
         while (result.expiresAt.getTime() - Date.now() > 5 * 60 * 1000) {
-            await new Promise(resolve => setTimeout(resolve, 10_000));
+            await new Promise(resolve => setTimeout(resolve, 60_000));
             result = await this.fetchInfo();
         }
 

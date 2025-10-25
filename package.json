@@ -1,7 +1,7 @@
 {
-  "name": "@studiostyx/erisbot-cli",
-  "version": "0.3.0",
-  "description": "A cli to connect to the erisbot api",
+  "name": "@studiostyx/erisbot-sdk",
+  "version": "1.0.1",
+  "description": "A sdk to connect to the erisbot api",
   "license": "MIT",
   "author": "birdtool",
   "type": "module",
@@ -22,11 +22,13 @@
     "typescript": "^5.0.0"
   },
   "keywords": [
-    "cli",
+    "sdk",
     "erisbot",
     "bot",
     "api",
-    "studiostyx"
+    "studiostyx",
+    "discord",
+    "eris"
   ],
   "repository": {
     "type": "git",
