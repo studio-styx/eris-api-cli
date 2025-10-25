@@ -6,14 +6,15 @@ import { GiveawayRoutes } from "./routes/giveawayRoutes.js";
 import { CacheRoute } from "./cache.js";
 import { RequestHelper } from "./helpers/requestHelper.js";
 import { checkVersion } from "./checkVersion.js";
-import { readFileSync } from "fs";
-import { join } from "path";
 import { ErisApiSdkGiveawayInfo, ErisApiSdkUserTransaction } from "./types.js";
+import { readFileSync } from "fs";
+import { dirname, join } from "path";
+import { fileURLToPath } from "url";
 
-// Lê a versão do package.json dinamicamente
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 const packageJson = JSON.parse(readFileSync(join(__dirname, "../package.json"), "utf-8"));
-const { version } = packageJson;
-
+const version = packageJson.version;
 export const BASEURL = "https://apieris.squareweb.app/v2";
 
 /**
