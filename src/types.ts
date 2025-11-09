@@ -7,7 +7,7 @@ export type ErisApiSdkUserLogsData = {
     data: ErisApiSdkUserLogs
 }
 
-export type ErisApiSdkErrorsCode = 
+export type ErisApiSdkErrorsCode =
     | "USER_NOT_FOUND"
     | "INSUFFICIENT_FUNDS"
     | "TRANSACTION_NOT_FOUND"
@@ -107,50 +107,53 @@ export type ErisApiSdkUserInfoPet = {
     spouseId: number | null;
     parent1Id: number | null;
     parent2Id: number | null;
-    personality: ({
-        trait: {
-            id: number;
-            name: string;
-            geneType: ErisApiSdkPetInfoGeneticsGeneType;
-            personalityConflictNames: string[];
-        };
-    } & {
-        id: number;
-        userPetId: number;
-        traitId: number;
-    })[];
-    genetics: ({
-        gene: {
-            id: number;
-            trait: string;
-            createdAt: Date;
-            updatedAt: Date;
-            petId: number;
-            geneType: ErisApiSdkPetInfoGeneticsGeneType;
-            colorPart: ErisApiSdkPetInfoGeneticsColorPart;
-        };
-    } & {
-        id: number;
-        createdAt: Date;
-        userPetId: number;
-        geneId: number;
-        inheritedFromParent1: boolean | null;
-        inheritedFromParent2: boolean | null;
-    })[];
-    skills: ({
-        skill: {
-            id: number;
-            name: string;
-            createdAt: Date;
-        };
-    } & {
-        id: number;
-        xp: number;
-        createdAt: Date;
-        userPetId: number;
-        skillId: number;
-        level: number;
-    })[];
+};
+
+type PetPersonality = {
+    id: number;
+    userPetId: number;
+    traitId: number;
+}
+
+type Trait = {
+    id: number;
+    name: string;
+    geneType: ErisApiSdkPetInfoGeneticsGeneType;
+    personalityConflictNames: string[];
+};
+
+type PetGenetics = ({
+    id: number;
+    createdAt: Date;
+    userPetId: number;
+    geneId: number;
+    inheritedFromParent1: boolean | null;
+    inheritedFromParent2: boolean | null;
+});
+
+type Gene = {
+    id: number;
+    trait: string;
+    createdAt: Date;
+    updatedAt: Date;
+    petId: number;
+    geneType: ErisApiSdkPetInfoGeneticsGeneType;
+    colorPart: ErisApiSdkPetInfoGeneticsColorPart;
+};
+
+type PetSkills = ({
+    id: number;
+    xp: number;
+    createdAt: Date;
+    userPetId: number;
+    skillId: number;
+    level: number;
+})[];
+
+type Skill = {
+    id: number;
+    name: string;
+    createdAt: Date;
 };
 
 export type ErisApiSdkPetInfoGeneticsGeneType = "DOMINANT" | "RECESSIVE" | "CODOMINANT" | "NEUTRAL";
@@ -262,3 +265,197 @@ export type ErisApiSdkError = {
     bot: boolean;
     banner: string | null;
 }
+
+type UserFieldPetType = boolean | {
+    skills?: boolean;
+    genetics?: boolean;
+    personality?: boolean;
+    pet?: boolean;
+}
+
+export type ErisApiSdkUserFieldsType = {
+    pets?: UserFieldPetType;
+    activePet?: UserFieldPetType;
+    giveaways?: boolean | {
+        giveaway?: boolean;
+    }
+    stocks?: boolean;
+    fishs?: boolean | {
+        fish?: boolean;
+    };
+    fishingRods?: boolean | {
+        fishingRod?: boolean;
+    };
+    cooldowns?: boolean;
+    company?: boolean;
+    bets?: boolean | {
+        match?: boolean | {
+            homeTeam?: boolean;
+            awayTeam?: boolean;
+        }
+    }
+}
+
+export type ErisApiSdkFootballBet = {
+    id: BigInt;
+    matchId: BigInt;
+    userId: String;
+
+    amount: number;
+    type: ErisApiSdkFootballBetType;
+    odds: number;
+    status: ErisApiSdkFootballBetStatus;
+
+    quantity?: String    // Depois pode ser parseado para number
+
+    createdAt: Date
+    updatedAt: Date
+}
+
+export type ErisApiSdkFootballBetType = "HOME_WIN" | "DRAW" | "AWAY_WIN" | "EXACT_GOALS" | "GOALS_HOME" | "GOALS_AWAY"
+export type ErisApiSdkFootballBetStatus = "PENDING" | "WON" | "LOST" | "CANCELED";
+
+export type ErisApiSdkFootballMatch = {
+    id: bigint;
+    status: ErisApiSdkFootballMatchStatus;
+    apiId: number;
+    startAt: Date;
+    homeTeamId: bigint;
+    awayTeamId: bigint;
+    competitionId: bigint;
+    goalsHome: number | null;
+    goalsAway: number | null;
+    venue: string | null;
+    oddsHomeWin: number | null;
+    oddsDraw: number | null;
+    oddsAwayWin: number | null;
+};
+
+export type ErisApiSdkFootballMatchStatus =
+    | "SCHEDULED"
+    | "LIVE"
+    | "IN_PLAY"
+    | "PAUSED"
+    | "FINISHED"
+    | "POSTPONED"
+    | "SUSPENDED"
+    | "CANCELED"
+    | "AWARDED"
+
+export type ErisApiSdkFootballTeam = {
+    id: BigInt;
+    name: string;
+    apiId: bigint;
+    venue: string;
+    shortName: string;
+    tla: string;
+    crest: string;
+    address: string;
+    clubColors: string | null;
+    areaId: number;
+    points: number;
+};
+
+export interface ErisApiSdkUserInfoPossiblesFields {
+    pets?: ErisApiSdkUserInfoPet & (
+        | { skills: (PetSkills & { skill: Skill })[] }
+        | { genetics: (PetGenetics & { gene: Gene })[] }
+        | { personality: (PetPersonality & { trait: Trait })[] }
+        | { pet: { id: number; createdAt: Date; name: string; flags: string[]; rarity: Rarity; price: number; animal: "CAT" | "DOG" | "BIRD" | "RABBIT" | "HAMSTER" | "DRAGON" | "LION" | "JAGUAR"; specie: string; isEnabled: boolean } }
+    );
+    activePet?: ErisApiSdkUserInfoPet & (
+        | { skills: (PetSkills & { skill: Skill })[] }
+        | { genetics: (PetGenetics & { gene: Gene })[] }
+        | { personality: (PetPersonality & { trait: Trait })[] }
+        | { pet: { id: number; createdAt: Date; name: string; flags: string[]; rarity: Rarity; price: number; animal: "CAT" | "DOG" | "BIRD" | "RABBIT" | "HAMSTER" | "DRAGON" | "LION" | "JAGUAR"; specie: string; isEnabled: boolean } }
+    );
+    giveaways?: ErisApiSdkUserInfoGiveaways[] & {
+        giveaway?: Pick<ErisApiSdkGiveawayInfo, "id" | "localId" | "title" | "description" | "ended" | "serverStayRequired" | "usersWins" | "expiresAt" | "createdAt" | "updatedAt">;
+    };
+    company?: ErisApiSdkCompany;
+    cooldowns?: ErisApiSdkUserInfoCooldown[];
+    fishs?: (ErisApiSdkUserInfoFish & { fish?: { id: number; createdAt: Date; name: string; rarity: Rarity; price: number } })[];
+    fishingRods?: (ErisApiSdkUserInfoFishingRod & { fishingRod?: { id: number; createdAt: Date; name: string; durability: number; price: number; rarity: Rarity } })[];
+    stocks?: ErisApiSdkUserInfoStock[];
+    bets?: (ErisApiSdkFootballBet & {
+        match?: ErisApiSdkFootballMatch & {
+            homeTeam?: ErisApiSdkFootballTeam;
+            awayTeam?: ErisApiSdkFootballTeam;
+        }
+    })[];
+}
+
+type Rarity = "COMMON" | "RARE" | "EPIC" | "LEGENDARY";
+
+// === TIPOS BASE ===
+type BaseUserInfo = ErisApiSdkUserInfo;
+
+type BetsField<T> = (ErisApiSdkFootballBet & (
+    T extends { match: infer M }
+    ? M extends object
+    ? {
+        match: ErisApiSdkFootballMatch &
+        ("homeTeam" extends keyof M
+            ? M["homeTeam"] extends true
+            ? { homeTeam: ErisApiSdkFootballTeam }
+            : {}
+            : {}) &
+        ("awayTeam" extends keyof M
+            ? M["awayTeam"] extends true
+            ? { awayTeam: ErisApiSdkFootballTeam }
+            : {}
+            : {})
+    }
+    : { match?: ErisApiSdkFootballMatch }
+    : {}
+))[];
+// === Campos com subcampos ===
+type FieldWithSubfields<
+    Subfields extends object,
+    K extends string
+> =
+    K extends "pets" | "activePet" ? PetField<Subfields & UserFieldPetType> :
+    K extends "fishs" ? FishField<Subfields> :
+    K extends "fishingRods" ? FishingRodField<Subfields> :
+    K extends "giveaways" ? GiveawayField<Subfields> :
+    K extends "bets" ? BetsField<Subfields> :
+    never;
+
+// === PET FIELD ===
+type PetField<T extends UserFieldPetType> = ErisApiSdkUserInfoPet & (
+    T extends { skills: true } ? { skills: (PetSkills & { skill: Skill })[] } :
+    T extends { genetics: true } ? { genetics: (PetGenetics & { gene: Gene })[] } :
+    T extends { personality: true } ? { personality: (PetPersonality & { trait: Trait })[] } :
+    T extends { pet: true } ? { pet: { id: number; createdAt: Date; name: string; flags: string[]; rarity: Rarity; price: number; animal: "CAT" | "DOG" | "BIRD" | "RABBIT" | "HAMSTER" | "DRAGON" | "LION" | "JAGUAR"; specie: string; isEnabled: boolean } } :
+    {}
+);
+
+// === FISH FIELD ===
+type FishField<T> = (ErisApiSdkUserInfoFish & (
+    T extends { fish: true } ? { fish: { id: number; createdAt: Date; name: string; rarity: Rarity; price: number } } : {}
+))[];
+
+// === FISHING ROD FIELD ===
+type FishingRodField<T> = (ErisApiSdkUserInfoFishingRod & (
+    T extends { fishingRod: true } ? { fishingRod: { id: number; createdAt: Date; name: string; durability: number; price: number; rarity: Rarity } } : {}
+))[];
+
+// === GIVEAWAY FIELD ===
+type GiveawayField<T> = ErisApiSdkUserInfoGiveaways[] & (
+    T extends { giveaway: true }
+    ? { giveaway: Pick<ErisApiSdkGiveawayInfo, "id" | "localId" | "title" | "description" | "ended" | "serverStayRequired" | "usersWins" | "expiresAt" | "createdAt" | "updatedAt"> }
+    : {}
+);
+
+// === TIPO RELATIVO FINAL ===
+export type RelativeUserInfo<T extends ErisApiSdkUserFieldsType | undefined = undefined> =
+    T extends undefined
+    ? BaseUserInfo
+    : BaseUserInfo & {
+        [K in keyof T & keyof ErisApiSdkUserInfoPossiblesFields]:
+        T[K] extends true
+        ? NonNullable<ErisApiSdkUserInfoPossiblesFields[K]>
+        : T[K] extends object
+        ? FieldWithSubfields<T[K], K & string>
+        : never
+    };

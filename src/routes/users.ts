@@ -1,4 +1,4 @@
-import { BASEURL, ErisApiSdkStxApiTransactionResponse, ErisApiSdkUserInfoFull, ErisApiSdkUserTransaction } from "../index.js";
+import { BASEURL, ErisApiSdkUserFieldsType, ErisApiSdkUserInfo, ErisApiSdkUserInfoFull, ErisApiSdkUserTransaction, RelativeUserInfo } from "../index.js";
 import { TransactionRoute } from "./transactionRoutes.js";
 import { CacheRoute } from "../cache.js";
 import { RequestHelper } from "../helpers/requestHelper.js";
@@ -110,31 +110,97 @@ export class UserRoutes {
         }
     }
 
-     /**
-     * Retorna informações completas do usuário, incluindo pets, estoques e cooldowns.
-     * 
-     * @example
-     * ```ts
-     * const info = await user.fetchInfo();
-     * console.log(info.pets, info.company);
-     * ```
-     * 
-     * @param throwError Se false, retorna false ao invés de lançar erro.
-     * @returns Informações completas do usuário ou false.
-     * @throws {Error} Se não houver permissão ou ocorrer erro na requisição.
-     */
-    public async fetchInfo(throwError = true): Promise<ErisApiSdkUserInfoFull | false> {
-        try {
-            const data = await this.helper.send<ErisApiSdkUserInfoFull>({
-                method: "GET",
-                url: `${BASEURL}/user/info/${this.userId}`
-            }, "USER.INFO.READ", this.cache);
+    /**
+    * Retorna informações completas do usuário, incluindo pets, estoques e cooldowns.
+    * 
+    * @example
+    * ```ts
+    * const info = await user.fetchInfo();
+    * console.log(info.pets, info.company);
+    * ```
+    * 
+    * @param throwError Se false, retorna false ao invés de lançar erro.
+    * @returns Informações completas do usuário ou false.
+    * @throws {Error} Se não houver permissão ou ocorrer erro na requisição.
+    */
+    // Sobrecarga 1: com fields → autocomplete total
+    public fetchInfo<T extends ErisApiSdkUserFieldsType>(
+        fields: T,
+        throwError: true
+    ): Promise<RelativeUserInfo<T>>;
 
+    // 2. fields + throwError = false → pode retornar false
+    public fetchInfo<T extends ErisApiSdkUserFieldsType>(
+        fields: T,
+        throwError: false
+    ): Promise<RelativeUserInfo<T> | false>;
+
+    // 3. fields + throwError não passado → padrão true → nunca retorna false
+    public fetchInfo<T extends ErisApiSdkUserFieldsType>(
+        fields: T
+    ): Promise<RelativeUserInfo<T>>;
+
+    // 4. sem fields → padrão true → nunca retorna false
+    public fetchInfo(): Promise<RelativeUserInfo<undefined>>;
+
+    // 5. sem fields + throwError = false → pode retornar false
+    public fetchInfo(throwError: false): Promise<RelativeUserInfo<undefined> | false>;
+
+    public async fetchInfo<T extends ErisApiSdkUserFieldsType | undefined = undefined>(
+        fields?: T,
+        throwError = true
+    ): Promise<any> {
+        try {
+            const params: Record<string, string> = {};
+            if (fields) {
+                const paths = buildIncludeQuery(fields as ErisApiSdkUserFieldsType);
+                if (paths.length > 0) params.include = paths.join('+');
+            }
+
+            const data = await this.helper.send<any>({
+                method: "GET",
+                url: `${BASEURL}/users/${this.userId}/info`,
+                params,
+            }, "USERS.READ", this.cache);
+
+            if (throwError) return data;
             return data;
+
         } catch (err) {
             if (this.debug) throw err;
             if (!throwError) return false;
             throw err;
         }
     }
+}
+
+function buildIncludeQuery(fields: ErisApiSdkUserFieldsType): string[] {
+    const paths: string[] = [];
+
+    const addPath = (base: string, subfields: any, _prefix = '') => {
+        if (subfields === true) {
+            paths.push(base);
+            return;
+        }
+
+        if (typeof subfields === 'object' && subfields !== null) {
+            for (const [key, value] of Object.entries(subfields)) {
+                if (value === true) {
+                    paths.push(`${base}.${key}`);
+                } else if (typeof value === 'object' && value !== null) {
+                    addPath(`${base}.${key}`, value);
+                }
+            }
+        }
+    };
+
+    for (const [field, value] of Object.entries(fields)) {
+        if (value === true) {
+            paths.push(field);
+        } else if (typeof value === 'object' && value !== null) {
+            addPath(field, value);
+        }
+    }
+
+    return paths;
 }
