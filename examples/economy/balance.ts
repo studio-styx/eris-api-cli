@@ -1,50 +1,41 @@
 import { SlashCommandBuilder, CommandInteraction } from "discord.js";
-import { ErisApiCli } from "@studiostyx/erisbot-sdk";
+import { ErisApiSdk, ErisSdkError } from "@studiostyx/erisbot-sdk";
 
 export const data = new SlashCommandBuilder()
     .setName("give-stx")
     .setDescription("Dá STX a um usuário")
     .addUserOption((option) =>
-        option.setName("user").setDescription("Usuário que receberá STX").setRequired(true)
+        option.setName("user").setDescription("Usuário para ver quantos stx tem").setRequired(false)
     )
-    .addIntegerOption((option) =>
-        option.setName("amount").setDescription("Quantidade de STX").setRequired(true).setMinValue(1)
-    )
-    .addStringOption((option) =>
-        option.setName("reason").setDescription("Motivo da transação").setRequired(false)
-    );
+
+const sdk = new ErisApiSdk("TOKEN_DO_BOT", true);
 
 export async function execute(interaction: CommandInteraction) {
     await interaction.deferReply();
 
-    const sdk = new ErisApiCli("TOKEN_DO_BOT", true); // true ativa debug
-    await sdk.initCache(); // Inicializa o cache (opcional)
-
-    const user = interaction.options.getUser("user", true);
-    const amount = interaction.options.getInteger("amount", true);
-    const reason = interaction.options.getString("reason") || "Transação via comando";
+    const user = interaction.options.getUser("user") || interaction.user;
 
     try {
-        await interaction.editReply("Iniciando transação...");
+        await interaction.editReply(`Verificando o saldo de ${user.displayName}`);
 
-        // Dar STX a um usuário
-        const tx = await sdk.users.get(user.id).balance.give({
-            guildId: interaction.guildId!,
-            channelId: interaction.channelId,
-            amount,
-            reason,
-            expiresAt: "1m",
-        });
+        // Ver quantos stx tem o usuário
+        const userBalance = sdk.users.get(user.id).balance.get(); // Ou sdk.users.get(user.id).getBalance();
+
+        /*
+            Essa rota retorna apenas o saldo atual do usuário.
+            Se quiser dar ou retirar STX, use os métodos give() e receive() na rota balance.
+        */
 
         await interaction.editReply(
-            "Transação criada! Por favor, confirme a transação clicando no botão na mensagem enviada pela Éris."
+            `O saldo de: ${user.displayName} saldo é: ${userBalance}`
         );
-
-        // Esperar confirmação
-        const result = await tx.waitForCompletion();
-        await interaction.editReply(`Transação ${result === "APPROVED" ? "aprovada" : "não aprovada"}!`);
     } catch (error) {
-        console.error("Erro ao executar a transação:", error);
-        await interaction.editReply("Ocorreu um erro ao processar a transação.");
+        if (error instanceof ErisSdkError) {
+            console.error("Erro ao executar a transação:", error);
+            await interaction.editReply("Ocorreu um erro ao processar seu saldo");
+        } else {
+            console.error("Erro inesperado:", error);
+            await interaction.editReply("Ocorreu um erro inesperado.");
+        }
     }
 }

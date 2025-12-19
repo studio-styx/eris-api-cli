@@ -57,9 +57,11 @@ export class ErisApiSdk {
         this.helper = new RequestHelper(token, debug);
         // Verifica a versão em segundo plano
         void checkVersion(version);
+        void this.initCache();
     }
 
     /**
+     * @deprecated - Não use mais, o cache é inicializado automaticamente
      * Inicializa o cache do bot carregando dados da API
      * @returns Dados de cache carregados { money, permissions, giveaways }
      */

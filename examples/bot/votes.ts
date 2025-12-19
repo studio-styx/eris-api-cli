@@ -1,5 +1,5 @@
 import { SlashCommandBuilder, CommandInteraction } from "discord.js";
-import { ErisApiCli } from "@studiostyx/erisbot-sdk";
+import { ErisApiSdk, ErisSdkError } from "@studiostyx/erisbot-sdk";
 
 export const data = new SlashCommandBuilder()
     .setName("bot-votes")
@@ -8,7 +8,7 @@ export const data = new SlashCommandBuilder()
 export async function execute(interaction: CommandInteraction) {
     await interaction.deferReply();
 
-    const sdk = new ErisApiCli("TOKEN_DO_BOT", true); // true ativa debug
+    const sdk = new ErisApiSdk("TOKEN_DO_BOT", true); // true ativa debug
     await sdk.initCache(); // Inicializa o cache (opcional)
 
     try {
@@ -21,7 +21,12 @@ export async function execute(interaction: CommandInteraction) {
             `Últimos votos: ${votes.data.length > 0 ? votes.data.map((v) => `${v.userId} em ${v.createdAt}`).join("\n") : "Nenhum"}`
         );
     } catch (error) {
-        console.error("Erro ao consultar votos do bot:", error);
-        await interaction.editReply("Ocorreu um erro ao consultar os votos do bot.");
+        if (error instanceof ErisSdkError) {
+            console.error("Erro ao executar a transação:", error);
+            await interaction.editReply("Ocorreu um erro ao buscar os meus votos");
+        } else {
+            console.error("Erro inesperado:", error);
+            await interaction.editReply("Ocorreu um erro inesperado.");
+        }
     }
 }

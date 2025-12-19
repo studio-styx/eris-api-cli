@@ -1,6 +1,6 @@
 {
   "name": "@studiostyx/erisbot-sdk",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "A sdk to connect to the erisbot api",
   "license": "MIT",
   "author": "birdtool",

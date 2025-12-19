@@ -1,5 +1,5 @@
 import { SlashCommandBuilder, CommandInteraction } from "discord.js";
-import { ErisApiCli } from "@studiostyx/erisbot-sdk";
+import { ErisApiSdk, ErisSdkError } from "@studiostyx/erisbot-sdk";
 
 export const data = new SlashCommandBuilder()
     .setName("giveaway-info")
@@ -8,11 +8,11 @@ export const data = new SlashCommandBuilder()
         option.setName("id").setDescription("ID do sorteio").setRequired(true)
     );
 
+const sdk = new ErisApiSdk("TOKEN_DO_BOT", true); // true ativa debug
+
 export async function execute(interaction: CommandInteraction) {
     await interaction.deferReply();
 
-    const sdk = new ErisApiCli("TOKEN_DO_BOT", true); // true ativa debug
-    await sdk.initCache(); // Inicializa o cache (opcional)
 
     const giveawayId = interaction.options.getInteger("id", true);
 
@@ -35,7 +35,12 @@ export async function execute(interaction: CommandInteraction) {
             await interaction.editReply(`Sorteio finalizado: ${finalState.ended ? "Sim" : "Não"}`);
         }
     } catch (error) {
-        console.error("Erro ao consultar sorteio:", error);
-        await interaction.editReply("Ocorreu um erro ao consultar o sorteio.");
+        if (error instanceof ErisSdkError) {
+            console.error("Erro ao executar a transação:", error);
+            await interaction.editReply("Ocorreu um erro ao processar o sorteio.");
+        } else {
+            console.error("Erro inesperado:", error);
+            await interaction.editReply("Ocorreu um erro inesperado.");
+        }
     }
 }

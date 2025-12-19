@@ -1,5 +1,5 @@
 import { SlashCommandBuilder, CommandInteraction } from "discord.js";
-import { ErisApiCli } from "@studiostyx/erisbot-sdk";
+import { ErisApiSdk, ErisSdkError } from "@studiostyx/erisbot-sdk";
 
 export const data = new SlashCommandBuilder()
     .setName("transaction-status")
@@ -7,12 +7,12 @@ export const data = new SlashCommandBuilder()
     .addIntegerOption((option) =>
         option.setName("id").setDescription("ID da transação").setRequired(true)
     );
+    
+const sdk = new ErisApiSdk("TOKEN_DO_BOT", true); // true ativa debug
 
 export async function execute(interaction: CommandInteraction) {
     await interaction.deferReply();
 
-    const sdk = new ErisApiCli("TOKEN_DO_BOT", true); // true ativa debug
-    await sdk.initCache(); // Inicializa o cache (opcional)
 
     const transactionId = interaction.options.getInteger("id", true);
 
@@ -35,7 +35,12 @@ export async function execute(interaction: CommandInteraction) {
             await interaction.editReply(`Status final da transação: ${status}`);
         }
     } catch (error) {
-        console.error("Erro ao consultar transação:", error);
-        await interaction.editReply("Ocorreu um erro ao consultar a transação.");
+        if (error instanceof ErisSdkError) {
+            console.error("Erro ao executar a transação:", error);
+            await interaction.editReply("Ocorreu um erro ao processar a transação.");
+        } else {
+            console.error("Erro inesperado:", error);
+            await interaction.editReply("Ocorreu um erro inesperado.");
+        }
     }
 }

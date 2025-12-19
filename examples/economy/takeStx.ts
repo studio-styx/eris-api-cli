@@ -1,5 +1,5 @@
 import { SlashCommandBuilder, CommandInteraction, userMention } from "discord.js";
-import { ErisApiCli } from "@studiostyx/erisbot-sdk";
+import { ErisApiSdk, ErisSdkError } from "@studiostyx/erisbot-sdk";
 
 export const data = new SlashCommandBuilder()
     .setName("take-stx")
@@ -26,11 +26,11 @@ export const data = new SlashCommandBuilder()
             )
     );
 
+const sdk = new ErisApiSdk("TOKEN_DO_BOT", true);
+
 export async function execute(interaction: CommandInteraction) {
     await interaction.deferReply();
 
-    const sdk = new ErisApiCli("TOKEN_DO_BOT", true); // true ativa debug
-    await sdk.initCache(); // Inicializa o cache (opcional)
 
     const user = interaction.options.getUser("user", true);
     const amount = interaction.options.getInteger("amount", true);
@@ -64,7 +64,12 @@ export async function execute(interaction: CommandInteraction) {
             `Transação de retirada ${result === "APPROVED" ? "aprovada" : "não aprovada"} para <@${user.id}>!`
         );
     } catch (error) {
-        console.error("Erro ao executar a transação de retirada:", error);
-        await interaction.editReply("Ocorreu um erro ao processar a transação de retirada. Verifique o token ou os parâmetros.");
+        if (error instanceof ErisSdkError) {
+            console.error("Erro ao executar a transação:", error);
+            await interaction.editReply("Ocorreu um erro ao processar a transação.");
+        } else {
+            console.error("Erro inesperado:", error);
+            await interaction.editReply("Ocorreu um erro inesperado.");
+        }
     }
 }

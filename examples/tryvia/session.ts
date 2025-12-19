@@ -1,5 +1,5 @@
 import { SlashCommandBuilder, CommandInteraction } from "discord.js";
-import { ErisApiCli } from "@studiostyx/erisbot-sdk";
+import { ErisApiSdk, ErisSdkError } from "@studiostyx/erisbot-sdk";
 
 export const data = new SlashCommandBuilder()
     .setName("tryvia")
@@ -12,11 +12,11 @@ export const data = new SlashCommandBuilder()
             .addChoices({ name: "Fácil", value: "EASY" }, { name: "Médio", value: "MEDIUM" }, { name: "Difícil", value: "HARD" })
     );
 
+const sdk = new ErisApiSdk("TOKEN_DO_BOT", true);
+
 export async function execute(interaction: CommandInteraction) {
     await interaction.deferReply();
 
-    const sdk = new ErisApiCli("TOKEN_DO_BOT", true); // true ativa debug
-    await sdk.initCache(); // Inicializa o cache (opcional)
 
     const amount = interaction.options.getInteger("amount", true);
     const difficulty = interaction.options.getString("difficulty") as "EASY" | "MEDIUM" | "HARD";
@@ -41,7 +41,12 @@ export async function execute(interaction: CommandInteraction) {
         const questionList = questions.questions.map((q, i) => `${i + 1}. ${q.question}`).join("\n");
         await interaction.editReply(`Questões recebidas:\n${questionList}`);
     } catch (error) {
-        console.error("Erro ao gerenciar Tryvia:", error);
-        await interaction.editReply("Ocorreu um erro ao obter as questões Tryvia.");
+        if (error instanceof ErisSdkError) {
+            console.error("Erro ao executar a transação:", error);
+            await interaction.editReply("Ocorreu um erro ao buscar perguntas de trivia");
+        } else {
+            console.error("Erro inesperado:", error);
+            await interaction.editReply("Ocorreu um erro inesperado.");
+        }
     }
 }
